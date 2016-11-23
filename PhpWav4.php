@@ -2,35 +2,197 @@
 ini_set('display_errors',1);
 error_reporting(E_ALL);
 
-/*|keysProg*/ $keysProgPW4=array('PhpWav4','DeletPrograms','PackNEC','InstallPrograms');
+/*|keysProg*/ $keysProgPW4=array('PhpWav4_v2','file_manager','exploer','PhpWav4','DeletPrograms','PackNEC','InstallPrograms');
  
 /*|programs*/
+
+/*>|PhpWav4_v2*/
+class PhpWav4_v2{
+	var $name="PhpWav4 v2";
+	function boot(){
+		global $keysProgPW4;
+		if(session_id()==false){session_start();}
+		$view=false;
+
+		if(!empty($_SESSION['keyPW4']) and !empty($_GET['keyPW4'])){
+			if($_SESSION['keyPW4']!=$_GET['keyPW4']){
+				$_SESSION['keyPW4']=$_GET['keyPW4'];
+			}
+		}else if(isset($_GET['keyPW4'])){
+			$_SESSION['keyPW4']=$_GET['keyPW4'];
+		}//get
+
+		if(!empty($_SESSION['keyPW4'])){switch($_SESSION['keyPW4']){
+			case "reset": $_SESSION['keyPW4']=bootPW4(); header('location:'); break;
+			case 'exit': header('location:/'); break;
+			default:
+				if(in_array($_SESSION['keyPW4'],$keysProgPW4)){
+					$o=new $_SESSION['keyPW4'];
+					if(method_exists($o,'start')){ $o->start(); $view=true; }
+				}
+		}}//обраьотка session*/
+
+		foreach($keysProgPW4 as $v){
+			echo "[<a href='?keyPW4=$v'>$v</a>]";
+		}
+		echo "<hr>";
+		if($view==true){$o->view();}else{echo 'home PhpWav4_v2';}
+
+	}//boot() -
+}//end class PhpWav4_v2;
+/*<|PhpWav4_v2*/
+
+/*>|file_manager*/
+class file_manager{
+	function start(){}//start() - Стартовая Функция для обработки Функционала.
+	function view(){
+		echo 'class test2';
+		echo '<div id="leftFM"></div>';
+		echo '<div id="rightFM"></div>';
+	}//view() - Функция для вивода содержмого на экран.
+}//end class file_manager;
+/*<|file_manager*/
+
+/*>|exploer*/
+class exploer{
+	var $info="Проводник по файловой системе.";
+	var $name="Проводник";
+	var $vers="v1.07";
+	var $desc=<<<NEC
+16.11.15 - v1.00 - Выпуск нового проводника.<br>
+07.12.15 - v1.01 - Исправлен баг корневого пути сервера (доб. функция: \"endGo();\") .<br>
+07.12.15 - v1.02 - Исправлен баг с кодировкой в ошибках (прописан meta charset) .<br>
+24.01.16 - v1.03 - Переделан meta charset через константу и мелкие исправления в коде.<br>
+27.01.16 - v1.04 - Переделан метод открытия директив через POST .<br>
+01.02.16 - v1.05 - Исправление стилей для общей совместимости . <br>
+02.02.16 - v1.06 - исправлен переход по директории и добавлена проверка директории + фун: |reset .<br>
+17.11.16 - v1.07 - Переделан под PhpWav4 + исправление стилей.
+NEC;
+
+	function newGo(){
+		$a=$_SERVER["SCRIPT_FILENAME"];
+		for($i=0; $i<strlen($a); $i++){if(substr($a,$i,1)=="/"){$b=$i;}}
+		return substr($a,0,$b+1);
+	}//goNaw() - создание нового пути - первый старт.
+	
+	function nam(){
+		$a=$_SERVER["SCRIPT_NAME"]; $b="";
+		for($i=0; $i<strlen($a); $i++){if(substr($a,$i,1)=="/"){$b="";}else{$b.=substr($a,$i,1);}}
+		return $b;
+	}//nam() - имя текущего файла или файл который вызывает эту функцию.
+	
+	function endGo(){
+		$s=$_SERVER["DOCUMENT_ROOT"];
+		if(substr($s,strlen($s)-1,1)=="/"){return $s;}else{return $s."/";}
+	}//endGo() - проверка DOCUMENT_ROOT на последний "/". 
+	
+	function session(){
+		if(empty($_SESSION["exploer_go"])){$go=$_SESSION["exploer_go"]=$this->newGo();}
+			else{$go=$_SESSION["exploer_go"];} 
+		if(isset($_POST["go"])){
+			if($_POST["go"]==".."){if($go!=$this->endGo()){
+				for($i=0; $i<strlen($_SESSION["exploer_go"])-1; $i++){if(substr($_SESSION["exploer_go"],$i,1)=="/"){$b=$i;}}
+				$go=substr($_SESSION["exploer_go"],0,$b+1);
+			}}else{$go=$_SESSION["exploer_go"].$_POST["go"]."/";}
+			if(file_exists($go)){$_SESSION["exploer_go"]=$go;}else{$go=$_SESSION["exploer_go"];}
+			header("location:".$this->nam()); // - исправить
+		}
+		return $go;
+	}//session(); - управление сессией и обработка пути директорий.
+	
+	function goFile($go){
+		$n=$_SERVER["DOCUMENT_ROOT"]; if(substr($n,strlen($n)-1,1)=="/"){$a=strlen($n)-1;}else{$a=strlen($n);}
+		return "http://".$_SERVER["HTTP_HOST"].substr($go,$a,strlen($go)-$a);
+	}//goFile(); - обработка пути для запуска файлов.
+	
+	function reset(){
+		if(session_id()==false){session_start();}
+		unset($_SESSION["exploer_go"]);
+		unset($_SESSION["exploer_file"]);
+	}
+	
+	function start($s=false){
+		if(session_id()==false){session_start();}//-проверяет запущена ли сессия
+		switch ($s){
+			case false: break;
+			case "|file": break; 
+			case "|reset" : $this->reset(); break;
+			default:exit("Неизвестная опция: <b>$s</b> !");
+		}//switch
+		$this->go=$this->session();//<---!
+	}//start() - Стартовая Функция.
+	
+	function view($s=false){
+		$go=$this->go;//<---!
+		$sdir=scandir($go);
+		for($i=0; $i<count($sdir); $i++){
+			if(is_dir($go.$sdir[$i])){if($sdir[$i]!="." and $sdir[$i]!=".."){$dir[]=$sdir[$i];}}
+			if(is_file($go.$sdir[$i])){$file[]=$sdir[$i];}
+		}
+	
+		if($s!="|file"){$goFile=$this->goFile($go);}// - путь для открытия файла
+		if($s=="|file"){
+			$goFile=$this->nam()."?file="; 
+			if(isset($_GET["file"])){$_SESSION["exploer_file"]=$go.$_GET["file"]; header("location:".$this->nam());} 
+		}// - путь к файлу через файловую систему для выбора
+
+		echo "<style>
+#start span,td,.ex_key{font:14px arial;}
+span{background:#333; color:gold; border:1px solid #eee; padding:1px 3px;}
+.ex_key{background:none; border:none; padding:0px; text-align:left;}
+.ex_key:hover{border:0px;cursor:pointer;}
+.ex_key{display:block; color:blue; width:100%; text-decoration:none; outline:none;}
+table{border:solid 1px #000; margin-top:3px;}
+tr:nth-child(odd){background:#eee;}
+tr:hover{background:#ddd;}
+#ex_tab{background:#fff;}
+		</style>";
+		echo "<div id=start>";
+		echo "<span>".$this->goFile($go)."</span>"; 
+		echo "<form method=post><table id=ex_tab>";
+		 
+		if($go!=$this->endGo()){
+			echo "<tr><td><input class=ex_key type=submit name=go value=..></td><td>dir</td></tr>";
+		}// - назад
+		
+		if(isset($dir)){for($i=0; $i<count($dir); $i++){
+			echo "<tr><td><input class=ex_key type=submit name=go value=".$dir[$i]."></td><td>dir</td></tr>";
+		}}// - папки
+		
+		if(isset($file)){for($i=0; $i<count($file); $i++){
+			echo "<tr><td><a class=ex_key href=\"".$goFile.$file[$i]."\">$file[$i]</a></td><td>file</td></tr>";
+		}}// - файлы
+		
+		//echo "<tr><td><input type=submit name=go value=|reset></td><td>reset</td></tr>";//- для отладки ???
+		echo "</table></form>";
+		echo "</div>";
+	}//view() - Функция для вивода содержмого на экран
+}//end class exploer;
+/*<|exploer*/
 
 /*>|PhpWav4*/
 class PhpWav4{
 	var $name="PhpWav4";
-	function start(){}
-	 function boot(){ $view=true;
+	var $vers="1.01";
+	var $desc=<<<NEC
+17.11.16 v1.01 - Добавлена обработка info в атрибут title для кнопок программ.
+NEC;
+
+function start(){}
+
+function boot(){
+$view=true;
 session_start();
-if(!empty($_GET['XML_PW4'])){
-	switch($_GET['XML_PW4']){
-		default : $_SESSION['keyPW4']=$_GET['XML_PW4']; $view=false;
-	}
-}//GET_XML_PW4
-/*if(!empty($_GET['keyPW4'])){
-	switch($_GET['keyPW4']){
-		//case "reset": $o=new PhpWav4; $o->resetPW4(); exit; break;
-		default : $_SESSION['keyPW4']=$_GET['keyPW4']; 
-	}
-}//GET*/
+
 if(!empty($_POST['keyPW4'])){
 	switch($_POST['keyPW4']){
 		case "update": break;
 		case "reset": $_SESSION['keyPW4']=bootPW4(); header('location:'); break;
 		case "exit": header('location:/'); break;
-		default : $_SESSION['keyPW4']=$_POST['keyPW4'];
+		default : $_SESSION['keyPW4']=$_POST['keyPW4']; header('location:');
 	}
 }//POST
+
 if(!empty($_SESSION['keyPW4']) and class_exists($_SESSION['keyPW4'])){
 	$o=new $_SESSION['keyPW4'];
 	$o->start();
@@ -70,9 +232,12 @@ global $keysProgPW4;
 if(!empty($keysProgPW4)){
 	echo '<div class="menuKeyPW4"><div class="nameMenuKeyPW4">Программы</div>'
 	.'<div class="menuOpenPW4">';
-	foreach($keysProgPW4 as $v){
-		$n=new $v; if(isset($n->name)){$n=$n->name;}else{$n=$v;}
-		echo "<button type='submit' class='keyPW4' name='keyPW4' value='$v'>$n</button>";
+	foreach($keysProgPW4 as $v){ $t='';
+		$n=new $v;
+		if(isset($n->info)){$t.="title='{$n->info}'";}
+		if(isset($n->name)){$n=$n->name;}else{$n=$v;}
+		echo "<button $t type='submit' class='keyPW4' name='keyPW4' value='$v'>$n</button>";
+		//echo "<button $t class='keyPW4 gr' onclick=blockC('?keyPW4=$v')>$n</button>";
 	}
 	echo "</div></div>";
 }
@@ -94,7 +259,7 @@ NEC;
 	function view(){
 		echo <<<NEC
 <h1 style='padding:5px 10px;margin:0;'>PhpWav4</h1>
-<p style='margin:0;padding:0 2px;text-align:right;font-weight:900;'>ver 0.0</p>
+<p style='margin:0;padding:0 2px;text-align:right;font-weight:900;'>ver {$this->vers}</p>
 NEC;
 	}
 }/*class PhpWav4*/
@@ -102,10 +267,12 @@ NEC;
 
 /*>|DeletPrograms*/
 class DeletPrograms{
-	var $name='Удаление программ';
+	var $name='Deleted Programs';
+	var $info="Удаляет программы из PhpWav4";
 	var $vers="1.01";
 	var $desc=<<<NEC
 09.11.16 v1.01 - Добавлено удалеие 'boot' .
+17.11.16 v1.02 - Правка стилей.
 NEC;
 	
 	var $view='home';
@@ -215,8 +382,8 @@ function view(){
 .keyButtonDP{border:1px solid #777;background:#fff;outline:none;padding:5px 10px; font-weight:bold;}
 .keyButtonDP:hover{box-shadow:2px 2px 5px rgba(0,0,0,0.5);}
 .keyButtonDP:active{color:#f55;}
-#formDelProg{background:#f77;padding:3px;}
-#headDelProg{text-wieght:bold;color:#fff;}
+#formDelProg{background:#f77;padding:3px;display:inline-block;}
+#headDelProg{text-wieght:bold;color:#fff;padding:0 3px;}
 #contentDelProg{background:#fff;margin:5px;border:1px solid #fee;}
 .nameDelProg{outline:none;border:1px solid #Fdc; background:#fff; display:block;width:100%; text-align:left; padding:3px; color:#f00;}
 .nameDelProg:hover{background:#f88;color:#fff;cursor:pointer;}
@@ -241,7 +408,8 @@ NEC;
 
 /*>|PackNEC*/
 class PackNEC{
-	var $name='Pack NEC';
+	var $name='PackNEC';
+	var $info="Упаковщик программ для Install Programs";
 	var $view='home';
 	var $vers="1.01";
 	var $desc=<<<NEC
@@ -351,7 +519,8 @@ NEC;
 
 /*>|InstallPrograms*/
 class InstallPrograms{
-	var $name='Установщик программ';
+	var $name='Install Programs';
+	var $info="Устанавливает программы в PhpWav4.";
 	var $vers='1.01';
 	var $view='home';
 	var $desc=<<<NEC
@@ -459,6 +628,7 @@ NEC;
 /*=boot=*/
 function bootPW4(){
 /*|boot*/
+	return 'PhpWav4_v2';
 	return 'PhpWav4';
 }//bootPW4()
 /*================*/

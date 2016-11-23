@@ -4,8 +4,12 @@ $boot=true;
 $program=<<<DEC
 class PhpWav4{
 	var \$name="PhpWav4";
+	var \$vers="1.01";
+	var \$desc=<<<NEC
+17.11.16 v1.01 - Добавлена обработка info в атрибут title для кнопок программ.
+NEC;
 	function start(){}
-	function boot(){ \$view=true;
+	 function boot(){ \$view=true;
 session_start();
 if(!empty(\$_GET['XML_PW4'])){
 	switch(\$_GET['XML_PW4']){
@@ -65,9 +69,11 @@ global \$keysProgPW4;
 if(!empty(\$keysProgPW4)){
 	echo '<div class="menuKeyPW4"><div class="nameMenuKeyPW4">Программы</div>'
 	.'<div class="menuOpenPW4">';
-	foreach(\$keysProgPW4 as \$v){
-		\$n=new \$v; if(isset(\$n->name)){\$n=\$n->name;}else{\$n=\$v;}
-		echo "<button type='submit' class='keyPW4' name='keyPW4' value='\$v'>\$n</button>";
+	foreach(\$keysProgPW4 as \$v){ \$t='';
+		\$n=new \$v;
+		if(isset(\$n->info)){\$t.="title='{\$n->info}'";}
+		if(isset(\$n->name)){\$n=\$n->name;}else{\$n=\$v;}
+		echo "<button \$t type='submit' class='keyPW4' name='keyPW4' value='\$v'>\$n</button>";
 	}
 	echo "</div></div>";
 }

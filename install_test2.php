@@ -1,14 +1,16 @@
 <?php /*000||*/
 	
 /*Кнопка или ярлык для запуска программы*/
-$keyProg="PackProgram";
+$keyProg="PhpWav4_v2";
+$boot=true;
 
 /*Тело пограммы*/
 $program=<<<NEC
 class $keyProg{
-	function start(){}
-	function view(){echo 'class test2';}
-}
+	function start(){}//start() - Стартовая Функция для обработки Функционала.
+	function boot(){}//boot() -
+	function view(){echo 'class $keyProg';}//view() - Функция для вивода содержмого на экран.
+}//end class $keyProg;
 NEC;
 
 /*boot*/

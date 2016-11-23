@@ -2,7 +2,8 @@
 $keyProg='InstallPrograms';
 $program=<<<DEC
 class InstallPrograms{
-	var \$name='Установщик программ';
+	var \$name='Install Programs';
+	var \$info="Устанавливает программы в PhpWav4.";
 	var \$vers='1.01';
 	var \$view='home';
 	var \$desc=<<<NEC

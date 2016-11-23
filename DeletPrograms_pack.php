@@ -2,10 +2,12 @@
 $keyProg='DeletPrograms';
 $program=<<<DEC
 class DeletPrograms{
-	var \$name='Удаление программ';
+	var \$name='Deleted Programs';
+	var \$info="Удаляет программы из PhpWav4";
 	var \$vers="1.01";
 	var \$desc=<<<NEC
 09.11.16 v1.01 - Добавлено удалеие 'boot' .
+17.11.16 v1.02 - Правка стилей.
 NEC;
 	
 	var \$view='home';
@@ -115,8 +117,8 @@ function view(){
 .keyButtonDP{border:1px solid #777;background:#fff;outline:none;padding:5px 10px; font-weight:bold;}
 .keyButtonDP:hover{box-shadow:2px 2px 5px rgba(0,0,0,0.5);}
 .keyButtonDP:active{color:#f55;}
-#formDelProg{background:#f77;padding:3px;}
-#headDelProg{text-wieght:bold;color:#fff;}
+#formDelProg{background:#f77;padding:3px;display:inline-block;}
+#headDelProg{text-wieght:bold;color:#fff;padding:0 3px;}
 #contentDelProg{background:#fff;margin:5px;border:1px solid #fee;}
 .nameDelProg{outline:none;border:1px solid #Fdc; background:#fff; display:block;width:100%; text-align:left; padding:3px; color:#f00;}
 .nameDelProg:hover{background:#f88;color:#fff;cursor:pointer;}
